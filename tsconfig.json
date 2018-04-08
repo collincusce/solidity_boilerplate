@@ -1,0 +1,20 @@
+{
+  "compilerOptions": {
+    "outDir": "./transpiled/",
+    "sourceMap": true,
+    "noImplicitAny": true,
+    "module": "commonjs",
+    "baseUrl": ".",
+    "allowJs": true,
+    "target": "es6"
+  },
+  "include": [
+    "node_modules/web3-typescript-typings/index.d.ts",
+    "node_modules/types-ethereumjs-util/index.d.ts",
+    "node_modules/types-bn/index.d.ts",
+    "types/*.ts",
+    "test/**/*.ts",
+    "utils/solidity.ts",
+    "migrations/*.ts"
+  ]
+}
