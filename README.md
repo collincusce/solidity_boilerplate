@@ -1,2 +1,2 @@
 # solidity_boilerplate
-A quickstart boilerplate for developing smart contracts, derived from https://github.com/dharmaprotocol/dharma-react-starter-kit
+Quickstart solidity boilerplate using the process created for developing the Dharma Protocol (c) 2017 Dharma Labs Inc.
