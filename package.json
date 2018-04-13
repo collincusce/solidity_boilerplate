@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "description": "Quickstart solidity boilerplate using the process created for developing the Dharma Protocol (c) 2017 Dharma Labs Inc.",
   "scripts": {
-    "generate-typings": "abi-gen --abiGlob './build/contracts/*.json' --templates ./types/contract_templates --output ./types/generated",
+    "generate-typings": "abi-gen --abis './build/contracts/*.json' --out './types/generated' --template './types/contract_templates/contract.handlebars' --partials './types/contract_templates/partials/*.handlebars'",
     "transpile": "rm -rf ./transpiled; copyfiles ./build/**/* ./transpiled; tsc",
     "lint-ts": "tslint migrations/*.ts test/**/*.ts",
     "lint-sol": "solhint contracts/*.sol contracts/**/*.sol",
@@ -12,7 +12,7 @@
     "soltsice": "soltsice",
     "migrate": "npm run transpile; truffle migrate",
     "test": "npm run compile; npm run generate-typings; npm run migrate; truffle test",
-    "chain": "ganache-cli --networkId 70 --accounts 20",
+    "chain": "ganache-cli --networkId 70 --accounts 20 --gasLimit 80000000",
     "validate": "npm ls"
   },
   "repository": "git@github.com:collincusce/solidity_boilerplate.git",
