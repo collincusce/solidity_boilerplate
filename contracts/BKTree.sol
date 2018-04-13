@@ -43,11 +43,11 @@ contract BKTree {
 		require(curNode.value == id);
 		curNode.completed = true;
 	}
-	
-	function findPath(uint[1] memory id) public view returns(uint[512] memory, uint[1] memory) {
+	//returns: path, pathlen, dist
+	function findPath(uint[1] memory id) public view returns(uint[512] memory, uint[1] memory, uint[1] memory) {
 	    uint[512] memory path;
 	    uint[1] memory pathlen;
-	    pathlen[0] = 0;
+	    pathlen[0] = 0x0;
 	    return _traverseAddPath(id, pathlen, path, _root);
 	    
 	}
@@ -80,7 +80,7 @@ contract BKTree {
 		}
 	}
 
-	function _traverseAddPath(uint[1] memory id, uint[1] memory pathlen, uint[512] memory path, Node storage node) internal view returns (uint[512] memory, uint[1] memory) {
+	function _traverseAddPath(uint[1] memory id, uint[1] memory pathlen, uint[512] memory path, Node storage node) internal view returns (uint[512] memory, uint[1] memory, uint[1] memory) {
 	    uint[1] memory hamdist;
 		hamdist[0] = _hammingDistance(node.value, id[0]);
 		if(node.children[hamdist[0]].value != 0) { //assuming no zero-value, needs updating, but unlikely edge-case
@@ -88,7 +88,7 @@ contract BKTree {
 		    path[pathlen[0]] = hamdist[0];
 			return _traverseAddPath(id, pathlen, path, node.children[hamdist[0]]);
 		} else {
-			return (path, hamdist);
+			return (path, pathlen, hamdist);
 		}
 	}
 

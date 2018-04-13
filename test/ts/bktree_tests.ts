@@ -33,7 +33,7 @@ contract("BKTree", async (ACCOUNTS) => {
 
     const NULL_ADDRESS = "0x0000000000000000000000000000000000000000";
 
-    const TX_DEFAULTS = { from: CONTRACT_OWNER, gas: 4000000 };
+    const TX_DEFAULTS = { from: CONTRACT_OWNER, gas: 80000000 };
 
     const root = "90988d8325694163e750b89304f01907";
 
@@ -183,7 +183,7 @@ contract("BKTree", async (ACCOUNTS) => {
         "923afadacace3035ff73ff7fbb80d073"
     ];
 
-    let testdata: Array<BigNumber>;
+    let testdata: Array<BigNumber> = [];
 
     before(async () => {
 
@@ -201,10 +201,10 @@ contract("BKTree", async (ACCOUNTS) => {
 
             for(let d of testdata) {
                 let path: Array<BigNumber>;
+                let pathlen: Array<BigNumber>;
                 let hamdist: Array<BigNumber>;
-                let x = await bktree.findPath.callAsync([d]);
-                console.log(x);
-                //await bktree.addNode.sendTransactionAsync(d, hamdist[0], new BigNumber("0x" + web3.sha3(d)), path, {from: CONTRACT_OWNER});
+                [path, pathlen, hamdist] = await bktree.findPath.callAsync([d]);
+                await bktree.addNode.sendTransactionAsync(d, hamdist[0], "0x" + web3.sha3(d.toString(16)), path.slice(0,pathlen[0].toNumber()), {from: CONTRACT_OWNER});
             }
             
             await expect(2).to.equal(2);
