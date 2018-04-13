@@ -204,7 +204,12 @@ contract("BKTree", async (ACCOUNTS) => {
                 let pathlen: Array<BigNumber>;
                 let hamdist: Array<BigNumber>;
                 [path, pathlen, hamdist] = await bktree.findPath.callAsync([d]);
-                await bktree.addNode.sendTransactionAsync(d, hamdist[0], "0x" + web3.sha3(d.toString(16)), path.slice(0,pathlen[0].toNumber()), {from: CONTRACT_OWNER});
+                console.log("d", d.toString(), "pathlen", pathlen[0].toString(), "hamdist", hamdist[0].toString());
+                path = path.slice(0,pathlen[0].toNumber());
+                console.log("path new", path);
+                console.log("sha3", web3.sha3(d.toString(16)));
+                //break;
+                await bktree.addNode.sendTransactionAsync(d, hamdist[0], web3.sha3(d.toString(16)), path, TX_DEFAULTS);
             }
             
             await expect(2).to.equal(2);

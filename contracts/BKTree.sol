@@ -23,11 +23,11 @@ contract BKTree {
 		_threshold = threshold;
 		_root = Node({value:root, ipfs:data, completed:false, child_count:0});
 	}
-//look into whether path is a memory variable because if it is, path.length shouldn't exist and remix is fucking up
+
 	function addNode(uint id, uint dist, bytes32 data, uint[] _path) public {
 		Node memory newNode = Node({value:id, ipfs:data, completed:false, child_count:0});
 		Node storage curNode = _root;
-		for(uint i = 0x0; i < _path.length; i = i.add(1)){
+		for(uint i = 0x1; i < _path.length; i = i.add(1)){
 			curNode = curNode.children[_path[i]];
 		}
 		require(curNode.children[dist].ipfs == 0x0);
@@ -49,7 +49,6 @@ contract BKTree {
 	    uint[1] memory pathlen;
 	    pathlen[0] = 0x0;
 	    return _traverseAddPath(id, pathlen, path, _root);
-	    
 	}
 
 	function searchNode(uint[1] memory id) public view returns (uint[1] memory, bytes32[512] memory) {
@@ -83,9 +82,9 @@ contract BKTree {
 	function _traverseAddPath(uint[1] memory id, uint[1] memory pathlen, uint[512] memory path, Node storage node) internal view returns (uint[512] memory, uint[1] memory, uint[1] memory) {
 	    uint[1] memory hamdist;
 		hamdist[0] = _hammingDistance(node.value, id[0]);
+		pathlen[0] = pathlen[0].add(1);
+		path[pathlen[0]] = hamdist[0];
 		if(node.children[hamdist[0]].value != 0) { //assuming no zero-value, needs updating, but unlikely edge-case
-		    pathlen[0] = pathlen[0].add(1);
-		    path[pathlen[0]] = hamdist[0];
 			return _traverseAddPath(id, pathlen, path, node.children[hamdist[0]]);
 		} else {
 			return (path, pathlen, hamdist);

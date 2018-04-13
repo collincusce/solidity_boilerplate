@@ -140,9 +140,9 @@
   version "8.10.3"
   resolved "https://registry.yarnpkg.com/@types/node/-/node-8.10.3.tgz#ee34a5c732703cf45d2fadc163a299a6b2f456c2"
 
-"NonFungibleToken@https://github.com/dharmaprotocol/NonFungibleToken.git":
+"NonFungibleToken@https://github.com/collincusce/NonFungibleToken.git":
   version "0.0.1"
-  resolved "https://github.com/dharmaprotocol/NonFungibleToken.git#3a45b200d14be1e1fc454f4b0fbf7f7b0d81f133"
+  resolved "https://github.com/collincusce/NonFungibleToken.git#3a45b200d14be1e1fc454f4b0fbf7f7b0d81f133"
   dependencies:
     zeppelin-solidity "^1.4.0"
 
