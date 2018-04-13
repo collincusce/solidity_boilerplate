@@ -14,24 +14,26 @@ contract BKTree {
 		uint value;
 		bytes32 ipfs; 
 		bool completed;
-		uint child_count;
+		uint[] children_distances;
 		mapping (uint => Node) children;
 	}
 	
 	//https://www.reddit.com/r/ethdev/comments/6lbmhy/a_practical_guide_to_cheap_ipfs_hash_storage_in/
 	function BKTree(uint root, bytes32 data, uint threshold) public {
 		_threshold = threshold;
-		_root = Node({value:root, ipfs:data, completed:false, child_count:0});
+		uint[] memory tmp;
+		_root = Node({value:root, ipfs:data, completed:false, children_distances:tmp});
 	}
 
 	function addNode(uint id, uint dist, bytes32 data, uint[] _path) public {
-		Node memory newNode = Node({value:id, ipfs:data, completed:false, child_count:0});
+		uint[] memory tmp;
+		Node memory newNode = Node({value:id, ipfs:data, completed:false, children_distances:tmp});
 		Node storage curNode = _root;
 		for(uint i = 0x1; i < _path.length; i = i.add(1)){
 			curNode = curNode.children[_path[i]];
 		}
 		require(curNode.children[dist].ipfs == 0x0);
-		curNode.child_count = curNode.child_count.add(1);
+		curNode.children_distances.push(dist);
 		curNode.children[dist] = newNode;
 	}
 
@@ -54,7 +56,7 @@ contract BKTree {
 	function searchNode(uint[1] memory id) public view returns (uint[1] memory, bytes32[512] memory) {
 		bytes32[512] memory candidates;
 		uint[1] memory candidateCount;
-        
+		candidateCount[0] = 0;
 		_getPathCandidates(id, candidateCount, candidates, _root);
 		return (candidateCount, candidates);
 	}
@@ -62,21 +64,23 @@ contract BKTree {
 	function _getPathCandidates(uint[1] memory id, uint[1] memory candidateCount, bytes32[512] memory candidates, Node storage node) private view {
 		uint[1] memory hamdist;
 		hamdist[0] = _hammingDistance(node.value, id[0]);
-		if(hamdist[0] >= hamdist[0].sub(_threshold) && hamdist[0] <= hamdist[0].add(_threshold)){
-    		candidateCount[0] = candidateCount[0].add(1);
-    	    candidates[candidateCount[0]] = node.ipfs;
+		if(hamdist[0] <= _threshold) {
+			candidates[candidateCount[0]] = node.ipfs;
+			candidateCount[0] = candidateCount[0].add(1);
 		}
-	    uint[1] memory mindist;
+
+		uint[1] memory mindist;
 	    mindist[0] = hamdist[0].sub(_threshold);
 	    mindist[0] = mindist[0] >= 0 ? mindist[0] : 0;
 	    
 	    uint[1] memory maxdist;
 	    maxdist[0] = hamdist[0].add(_threshold);
-	    maxdist[0] = maxdist[0] < node.child_count ? maxdist[0] : node.child_count.sub(1);
-	    
-		//for(uint i = mindist[0]; i <= maxdist[0]; i = i.add(1)){
-		//	_getPathCandidates(id, candidateCount, candidates, node.children[i]);
-		//}
+	    uint[1] memory i;
+		for(i[0] = 0; i[0] < node.children_distances.length; i[0] = i[0].add(1)){
+			if(node.children_distances[i[0]] >= mindist[0] && node.children_distances[i[0]] <= maxdist[0]){
+				_getPathCandidates(id, candidateCount, candidates, node.children[node.children_distances[i[0]]]);
+			}
+		}
 	}
 
 	function _traverseAddPath(uint[1] memory id, uint[1] memory pathlen, uint[512] memory path, Node storage node) internal view returns (uint[512] memory, uint[1] memory, uint[1] memory) {
