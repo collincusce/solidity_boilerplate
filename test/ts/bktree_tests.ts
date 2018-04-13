@@ -199,7 +199,7 @@ contract("BKTree", async (ACCOUNTS) => {
 
         it("Add Nodes", async () => {
 
-            for(let d of testdata) {
+            for(let d of testdata.slice(0,40)) {
                 let path: Array<BigNumber>;
                 let pathlen: Array<BigNumber>;
                 let hamdist: Array<BigNumber>;
@@ -212,6 +212,18 @@ contract("BKTree", async (ACCOUNTS) => {
                 await bktree.addNode.sendTransactionAsync(d, hamdist[0], web3.sha3(d.toString(16)), path, TX_DEFAULTS);
             }
             
+            await expect(2).to.equal(2);
+        });
+
+        it("Search Nodes", async () => {
+            for(let d of testdata.slice(0,40)) {
+                let candidates: Array<string>;
+                let candidateCount: Array<BigNumber>;
+                [candidateCount, candidates] = await bktree.searchNode.callAsync([d]);
+                console.log("candidateCount", candidateCount);
+                candidates = candidates.slice(0,candidateCount[0].toNumber());
+                console.log("candidates", candidates);
+            }
             await expect(2).to.equal(2);
         });
         

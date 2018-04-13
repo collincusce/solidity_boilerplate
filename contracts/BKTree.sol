@@ -50,7 +50,7 @@ contract BKTree {
 	    pathlen[0] = 0x0;
 	    return _traverseAddPath(id, pathlen, path, _root);
 	}
-
+	//returns candidateCount and candidates
 	function searchNode(uint[1] memory id) public view returns (uint[1] memory, bytes32[512] memory) {
 		bytes32[512] memory candidates;
 		uint[1] memory candidateCount;
@@ -74,9 +74,9 @@ contract BKTree {
 	    maxdist[0] = hamdist[0].add(_threshold);
 	    maxdist[0] = maxdist[0] < node.child_count ? maxdist[0] : node.child_count.sub(1);
 	    
-		for(uint i = mindist[0]; i <= maxdist[0]; i = i.add(1)){
-			_getPathCandidates(id, candidateCount, candidates, node.children[i]);
-		}
+		//for(uint i = mindist[0]; i <= maxdist[0]; i = i.add(1)){
+		//	_getPathCandidates(id, candidateCount, candidates, node.children[i]);
+		//}
 	}
 
 	function _traverseAddPath(uint[1] memory id, uint[1] memory pathlen, uint[512] memory path, Node storage node) internal view returns (uint[512] memory, uint[1] memory, uint[1] memory) {
