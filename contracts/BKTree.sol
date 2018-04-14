@@ -37,6 +37,10 @@ contract BKTree {
 		curNode.children[dist] = newNode;
 	}
 
+	function getrootchildrendistances() public view returns (uint[]){
+		return _root.children_distances;
+	}
+
 	function markCompleted(uint id, uint[] path) public {
 		Node storage curNode = _root;
 		for(uint i = 0x0; i < path.length; i = i.add(1)){
@@ -57,16 +61,18 @@ contract BKTree {
 		bytes32[512] memory candidates;
 		uint[1] memory candidateCount;
 		candidateCount[0] = 0;
-		_getPathCandidates(id, candidateCount, candidates, _root);
-		return (candidateCount, candidates);
+		return _getPathCandidates(id, candidateCount, candidates, _root);
 	}
 
-	function _getPathCandidates(uint[1] memory id, uint[1] memory candidateCount, bytes32[512] memory candidates, Node storage node) private view {
+	function _getPathCandidates(uint[1] memory id, uint[1] memory candidateCount, bytes32[512] memory candidates, Node storage node) internal view returns (uint[1] memory, bytes32[512] memory){
 		uint[1] memory hamdist;
+		uint[1] memory ccount = candidateCount;
+	    bytes32[512] memory candid8s = candidates;
+
 		hamdist[0] = _hammingDistance(node.value, id[0]);
 		if(hamdist[0] <= _threshold) {
-			candidates[candidateCount[0]] = node.ipfs;
-			candidateCount[0] = candidateCount[0].add(1);
+			candid8s[ccount[0]] = node.ipfs;
+			ccount[0] = ccount[0].add(1);
 		}
 
 		uint[1] memory mindist;
@@ -76,11 +82,15 @@ contract BKTree {
 	    uint[1] memory maxdist;
 	    maxdist[0] = hamdist[0].add(_threshold);
 	    uint[1] memory i;
+
 		for(i[0] = 0; i[0] < node.children_distances.length; i[0] = i[0].add(1)){
 			if(node.children_distances[i[0]] >= mindist[0] && node.children_distances[i[0]] <= maxdist[0]){
-				_getPathCandidates(id, candidateCount, candidates, node.children[node.children_distances[i[0]]]);
+				//return (ccount, candid8s, node.children[node.children_distances[i[0]]].value);
+				require(node.children[node.children_distances[i[0]]].value != 0x0);
+				(ccount, candid8s) = _getPathCandidates(id, ccount, candid8s, node.children[node.children_distances[i[0]]]);
 			}
 		}
+		return (ccount, candid8s);
 	}
 
 	function _traverseAddPath(uint[1] memory id, uint[1] memory pathlen, uint[512] memory path, Node storage node) internal view returns (uint[512] memory, uint[1] memory, uint[1] memory) {

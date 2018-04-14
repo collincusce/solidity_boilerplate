@@ -216,13 +216,19 @@ contract("BKTree", async (ACCOUNTS) => {
         });
 
         it("Search Nodes", async () => {
+            let tmp: Array<BigNumber> = await bktree.getrootchildrendistances.callAsync();
+            console.log("tmp", tmp);
+            
             for(let d of testdata.slice(0,40)) {
                 let candidates: Array<string>;
                 let candidateCount: Array<BigNumber>;
+                //let childs: BigNumber;
                 [candidateCount, candidates] = await bktree.searchNode.callAsync([d]);
+                //console.log("childs", childs);
                 console.log("candidateCount", candidateCount);
                 candidates = candidates.slice(0,candidateCount[0].toNumber());
                 console.log("candidates", candidates);
+                break;
             }
             await expect(2).to.equal(2);
         });
