@@ -199,7 +199,7 @@ contract("BKTree", async (ACCOUNTS) => {
 
         it("Add Nodes", async () => {
 
-            for(let d of testdata.slice(0,40)) {
+            for(let d of testdata.slice(0,30)) {
                 let path: Array<BigNumber>;
                 let pathlen: Array<BigNumber>;
                 let hamdist: Array<BigNumber>;
@@ -216,19 +216,26 @@ contract("BKTree", async (ACCOUNTS) => {
         });
 
         it("Search Nodes", async () => {
-            let tmp: Array<BigNumber> = await bktree.getrootchildrendistances.callAsync();
-            console.log("tmp", tmp);
             
-            for(let d of testdata.slice(0,40)) {
+            for(let d of testdata.slice(10,12)) {
                 let candidates: Array<string>;
                 let candidateCount: Array<BigNumber>;
-                //let childs: BigNumber;
                 [candidateCount, candidates] = await bktree.searchNode.callAsync([d]);
-                //console.log("childs", childs);
                 console.log("candidateCount", candidateCount);
                 candidates = candidates.slice(0,candidateCount[0].toNumber());
                 console.log("candidates", candidates);
-                break;
+            }
+            await expect(2).to.equal(2);
+        });
+
+        it("Search Nodes", async () => {
+            for(let d of testdata.slice(10,20)) {
+                let path: Array<BigNumber>;
+                let pathlen: Array<BigNumber>;
+                let hamdist: Array<BigNumber>;
+                [path, pathlen, hamdist] = await bktree.findPath.callAsync([d]);
+                path = path.slice(0,pathlen[0].toNumber());
+                await bktree.markCompleted.sendTransactionAsync(d, path, TX_DEFAULTS);
             }
             await expect(2).to.equal(2);
         });

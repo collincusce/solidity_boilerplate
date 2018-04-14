@@ -37,13 +37,9 @@ contract BKTree {
 		curNode.children[dist] = newNode;
 	}
 
-	function getrootchildrendistances() public view returns (uint[]){
-		return _root.children_distances;
-	}
-
 	function markCompleted(uint id, uint[] path) public {
 		Node storage curNode = _root;
-		for(uint i = 0x0; i < path.length; i = i.add(1)){
+		for(uint i = 0x1; i < path.length; i = i.add(1)){
 			curNode = curNode.children[path[i]];
 		}
 		require(curNode.value == id);
@@ -64,30 +60,29 @@ contract BKTree {
 		return _getPathCandidates(id, candidateCount, candidates, _root);
 	}
 
-	function _getPathCandidates(uint[1] memory id, uint[1] memory candidateCount, bytes32[512] memory candidates, Node storage node) internal view returns (uint[1] memory, bytes32[512] memory){
+	function _getPathCandidates(uint[1] memory id, uint[1] memory candidateCount, bytes32[512] memory candidates, Node storage _node) internal view returns (uint[1] memory, bytes32[512] memory){
 		uint[1] memory hamdist;
 		uint[1] memory ccount = candidateCount;
 	    bytes32[512] memory candid8s = candidates;
 
-		hamdist[0] = _hammingDistance(node.value, id[0]);
+		hamdist[0] = _hammingDistance(_node.value, id[0]);
 		if(hamdist[0] <= _threshold) {
-			candid8s[ccount[0]] = node.ipfs;
+			candid8s[ccount[0]] = _node.ipfs;
 			ccount[0] = ccount[0].add(1);
 		}
 
 		uint[1] memory mindist;
-	    mindist[0] = hamdist[0].sub(_threshold);
-	    mindist[0] = mindist[0] >= 0 ? mindist[0] : 0;
+	    mindist[0] = hamdist[0] > _threshold ? hamdist[0].sub(_threshold) : 0;
 	    
 	    uint[1] memory maxdist;
 	    maxdist[0] = hamdist[0].add(_threshold);
 	    uint[1] memory i;
 
-		for(i[0] = 0; i[0] < node.children_distances.length; i[0] = i[0].add(1)){
-			if(node.children_distances[i[0]] >= mindist[0] && node.children_distances[i[0]] <= maxdist[0]){
-				//return (ccount, candid8s, node.children[node.children_distances[i[0]]].value);
-				require(node.children[node.children_distances[i[0]]].value != 0x0);
-				(ccount, candid8s) = _getPathCandidates(id, ccount, candid8s, node.children[node.children_distances[i[0]]]);
+		for(i[0] = 0; i[0] < _node.children_distances.length; i[0] = i[0].add(1)){
+			if(_node.children_distances[i[0]] >= mindist[0] && _node.children_distances[i[0]] <= maxdist[0]){
+				//return (ccount, candid8s, _node.children[_node.children_distances[i[0]]].value);
+				//require(_node.children[_node.children_distances[i[0]]].value != 0x0);
+				(ccount, candid8s) = _getPathCandidates(id, ccount, candid8s, _node.children[_node.children_distances[i[0]]]);
 			}
 		}
 		return (ccount, candid8s);
