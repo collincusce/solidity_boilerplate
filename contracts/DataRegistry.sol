@@ -27,4 +27,8 @@ contract DataRegistry {
 		return (ipfs_lookup[idx], _dn.creationts, _dn.reportts, _dn.reporter, _dn.category, _dn.mimetype);
 	}
 
+	function getTop () public view returns(uint){
+		return ipfs_lookup.length;
+	}
+
 }

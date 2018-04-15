@@ -9,6 +9,7 @@
     "lint-sol": "solhint contracts/*.sol contracts/**/*.sol",
     "lint": "npm run lint-ts; npm run lint-sol",
     "compile": "truffle compile",
+    "production": "truffle compile --network production; npm run generate-typings; npm run transpile; truffle migrate --network production; truffle test --network production",
     "soltsice": "soltsice",
     "migrate": "npm run transpile; truffle migrate",
     "test": "npm run compile; npm run generate-typings; npm run migrate; truffle test",
