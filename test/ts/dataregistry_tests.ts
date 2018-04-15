@@ -196,6 +196,7 @@ contract("DataRegistry", async (ACCOUNTS) => {
         reportts: BigNumber;
         reporter: string;
         category: Categories;
+        complete: boolean;
         mimetype: string;
     }
 
@@ -210,11 +211,12 @@ contract("DataRegistry", async (ACCOUNTS) => {
             reportts: new BigNumber("0x0"),
             reporter: CONTRACT_OWNER,
             category: parseInt(n.slice(0,1), 16) % 6,
+            complete: false,
             mimetype: "application/json"
         };
         testdata.push(dn);
     }
-    
+    /*
     describe("Create DataRegistry, Grab data.", async () => {
         let tests = testdata.slice(0,30);
         let dn: DataNode;
@@ -224,36 +226,36 @@ contract("DataRegistry", async (ACCOUNTS) => {
             await dataregistry.addData.sendTransactionAsync(dn.ipfs, dn.creationts, dn.category, dn.mimetype, TX_DEFAULTS);
             //console.log("added: ", dn);
         };
+        console.log("setting timeout");
+        setTimeout(async () => {
+            let ipfs:BigNumber;
+            let creationts: BigNumber;
+            let reportts: BigNumber;
+            let reporter: string;
+            let categorybn: BigNumber;
+            let category: Categories;
+            let complete: boolean;
+            let mimetype: string;
+            //returns ipfs, creationts, reportts, reporter, category
+            [ipfs, creationts, reportts, reporter, categorybn, complete, mimetype] = await dataregistry.getData.callAsync(new BigNumber(2));
+            category = categorybn.toNumber();
+            dn = tests[2];
+            console.log("added: ", dn);
+            console.log("recieved: ", ipfs, creationts, reportts, reporter, category, complete, mimetype);
+            
+            let top = await dataregistry.getTop.callAsync();
+            console.log("top", top.toNumber());
+            let completedcount = await dataregistry.getCompletedCount.callAsync();
+            console.log("completed1", completedcount);
+            await dataregistry.markComplete.sendTransactionAsync(ipfs, TX_DEFAULTS);
 
-        let ipfs:BigNumber;
-        let creationts: BigNumber;
-        let reportts: BigNumber;
-        let reporter: string;
-        let categorybn: BigNumber;
-        let category: Categories;
-        let mimetype: string;
-        //returns ipfs, creationts, reportts, reporter, category
-        [ipfs, creationts, reportts, reporter, categorybn, mimetype] = await dataregistry.getData.callAsync(new BigNumber(2));
-        category = categorybn.toNumber();
-        dn = tests[2];
-        console.log("added: ", dn);
-        console.log("recieved: ", ipfs, creationts, reportts, reporter, category, mimetype);
-        
-        it("Check ipfs added", async () => {
-             await expect(ipfs).to.bignumber.equal(dn.ipfs);
-        });
-        it("Check creationts added", async () => {
-             await expect(creationts).to.bignumber.equal(dn.creationts);
-        });
-        it("Check reportts added", async () => {
-             await expect(reportts).to.bignumber.equal(dn.reportts);
-        });
-        it("Check reporter added", async () => {
-             await expect(reporter).to.equal(dn.reporter);
-        });
-        it("Check category added", async () => {
-             await expect(category).to.bignumber.equal(dn.category);
-        });
-    });
+            setTimeout(async () => {
+                [ipfs, creationts, reportts, reporter, categorybn, complete, mimetype] = await dataregistry.getData.callAsync(new BigNumber(2));
+                console.log("should be true: ", complete);
+                let completedcount = await dataregistry.getCompletedCount.callAsync();
+            }, 15000);
+
+        }, 15000);
+    });*/
 
 });
