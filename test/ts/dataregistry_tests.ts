@@ -8,7 +8,7 @@ import * as Web3 from "web3";
 import * as Units from "./test_utils/units";
 import * as utils from "./test_utils/utils";
 
-import {BKTreeContract} from "../../types/generated/b_k_tree";
+import {DataRegistryContract} from "../../types/generated/data_registry";
 
 import {BigNumberSetup} from "./test_utils/bignumber_setup";
 import ChaiSetup from "./test_utils/chai_setup";
@@ -23,21 +23,21 @@ BigNumberSetup.configure();
 ChaiSetup.configure();
 const expect = chai.expect;
 
-const BKTreeArtifact = artifacts.require("BKTree");
+const DataRegistryArtifact = artifacts.require("DataRegistry");
 
-contract("BKTree", async (ACCOUNTS) => {
+contract("DataRegistry", async (ACCOUNTS) => {
 
-    let bktree: BKTreeContract;
+    let dataregistry: DataRegistryContract;
 
     const CONTRACT_OWNER = ACCOUNTS[0];
 
     const NULL_ADDRESS = "0x0000000000000000000000000000000000000000";
 
-    const TX_DEFAULTS = { from: CONTRACT_OWNER, gas: 80000000 };
+    const TX_DEFAULTS = { from: CONTRACT_OWNER, gas: 8000000 };
 
-    const root = "90988d8325694163e750b89304f01907";
 
-    const TEST_DATA = [
+
+    const TEST_DATA= [
         "6cdadad86564e7c5602fd2901b6466e4",
         "904d6df8ce793ede179f7f730ec32090",
         "acc8b23696caae8e2d89e1f03f12609c",
@@ -178,68 +178,82 @@ contract("BKTree", async (ACCOUNTS) => {
         "b069d8ccdccc4471bf63e37f53bc9c7e",
         "70e4d6d0d4dc5c5ce3611e6367be9e71",
         "eacac286b2d2500af2c9df9ca380f163",
-        "5a58a4b0a0b40a1afe5bac9383a58d7f",
-        "d8dccecee6664494fff1d80198e0c07f",
-        "923afadacace3035ff73ff7fbb80d073"
+        "5a58a4b0a0b40a1afe5bac9383a58d7f"
     ];
 
-    let testdata: Array<BigNumber> = [];
+    enum Categories {
+        Fingerprint, 
+        Faceshot, 
+        MissingPerson, 
+        CriminalRecord, 
+        TrafficAlert, 
+        Uncategorized
+    }
 
-    before(async () => {
+    interface DataNode {
+        ipfs: BigNumber;
+        creationts: BigNumber;
+        reportts: BigNumber;
+        reporter: string;
+        category: Categories;
+        mimetype: string;
+    }
 
-        bktree = await BKTreeContract.deployed(web3, TX_DEFAULTS);
+    let testdata: Array<DataNode> = [];
 
-        for(let n  of TEST_DATA){
-            testdata.push(new BigNumber("0x" + n));
-        }
-  
-    });
+    dataregistry = await DataRegistryContract.deployed(web3, TX_DEFAULTS);
 
-    describe("Create Tree Nodes", async () => {
+    for(let n of TEST_DATA) {
+        let dn: DataNode = {
+            ipfs:new BigNumber("0x" + web3.sha3(n).substring(2)),
+            creationts: new BigNumber("0x" + n.slice(0,8)),
+            reportts: new BigNumber("0x0"),
+            reporter: CONTRACT_OWNER,
+            category: parseInt(n.slice(0,1), 16) % 6,
+            mimetype: "application/json"
+        };
+        testdata.push(dn);
+    }
+    
+    describe("Create DataRegistry, Grab data.", async () => {
+        let tests = testdata.slice(0,30);
+        let dn: DataNode;
+        for(let i = 0; i < tests.length; i++) {
+            dn = tests[i];
+            //console.log(dn.ipfs, dn.creationts, dn.category, dn.mimetype);
+            await dataregistry.addData.sendTransactionAsync(dn.ipfs, dn.creationts, dn.category, dn.mimetype, TX_DEFAULTS);
+            //console.log("added: ", dn);
+        };
 
-        it("Add Nodes", async () => {
-
-            for(let d of testdata.slice(0,30)) {
-                let path: Array<BigNumber>;
-                let pathlen: Array<BigNumber>;
-                let hamdist: Array<BigNumber>;
-                [path, pathlen, hamdist] = await bktree.findPath.callAsync([d]);
-                console.log("d", d.toString(), "pathlen", pathlen[0].toString(), "hamdist", hamdist[0].toString());
-                path = path.slice(0,pathlen[0].toNumber());
-                console.log("path new", path);
-                console.log("sha3", web3.sha3(d.toString(16)));
-                //break;
-                await bktree.addNode.sendTransactionAsync(d, hamdist[0], web3.sha3(d.toString(16)), path, TX_DEFAULTS);
-            }
-            
-            await expect(2).to.equal(2);
-        });
-
-        it("Search Nodes", async () => {
-            
-            for(let d of testdata.slice(10,12)) {
-                let candidates: Array<string>;
-                let candidateCount: Array<BigNumber>;
-                [candidateCount, candidates] = await bktree.searchNode.callAsync([d]);
-                console.log("candidateCount", candidateCount);
-                candidates = candidates.slice(0,candidateCount[0].toNumber());
-                console.log("candidates", candidates);
-            }
-            await expect(2).to.equal(2);
-        });
-
-        it("Search Nodes", async () => {
-            for(let d of testdata.slice(10,20)) {
-                let path: Array<BigNumber>;
-                let pathlen: Array<BigNumber>;
-                let hamdist: Array<BigNumber>;
-                [path, pathlen, hamdist] = await bktree.findPath.callAsync([d]);
-                path = path.slice(0,pathlen[0].toNumber());
-                await bktree.markCompleted.sendTransactionAsync(d, path, TX_DEFAULTS);
-            }
-            await expect(2).to.equal(2);
-        });
+        let ipfs:BigNumber;
+        let creationts: BigNumber;
+        let reportts: BigNumber;
+        let reporter: string;
+        let categorybn: BigNumber;
+        let category: Categories;
+        let mimetype: string;
+        //returns ipfs, creationts, reportts, reporter, category
+        [ipfs, creationts, reportts, reporter, categorybn, mimetype] = await dataregistry.getData.callAsync(new BigNumber(2));
+        category = categorybn.toNumber();
+        dn = tests[2];
+        console.log("added: ", dn);
+        console.log("recieved: ", ipfs, creationts, reportts, reporter, category, mimetype);
         
+        it("Check ipfs added", async () => {
+             await expect(ipfs).to.bignumber.equal(dn.ipfs);
+        });
+        it("Check creationts added", async () => {
+             await expect(creationts).to.bignumber.equal(dn.creationts);
+        });
+        it("Check reportts added", async () => {
+             await expect(reportts).to.bignumber.equal(dn.reportts);
+        });
+        it("Check reporter added", async () => {
+             await expect(reporter).to.equal(dn.reporter);
+        });
+        it("Check category added", async () => {
+             await expect(category).to.bignumber.equal(dn.category);
+        });
     });
 
 });
